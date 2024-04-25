@@ -1,0 +1,22 @@
+name: E2E Tests After Deploy to Production 
+on:
+  deployment_status:
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    if: github.event.deployment_status.state == 'success'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests with project 'unitySanity'
+      run: npx playwright test --project='unitySanity'
+      env:
+        ZONE: 'prod'
+        RETRIES: 1
